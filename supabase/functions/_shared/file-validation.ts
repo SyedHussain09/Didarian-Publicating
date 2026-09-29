@@ -1,5 +1,6 @@
 import { Inflate } from 'npm:fflate@0.8.3';
 import { HttpError } from './http.ts';
+import { hasUnsupportedPdfContent } from './pdf-content-credentials.ts';
 
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
 export const MEDIA_TYPES: Record<string, string> = {
@@ -157,5 +158,5 @@ export function validateFileBytes(bytes: Uint8Array, extension: string) {
   if (!/^%PDF-[12]\.[0-9]/.test(start) || !ending.includes('%%EOF')) invalid();
   // This is structural screening, not malware scanning. Serve all files as attachments.
   const content = new TextDecoder('latin1').decode(bytes);
-  if (/\/(JavaScript|JS|Launch|EmbeddedFile|RichMedia|OpenAction|AA)\b/.test(content)) invalid('PDFs with active or embedded content are not supported.');
+  if (hasUnsupportedPdfContent(bytes, content)) invalid('PDFs with scripts or unsupported attachments are not supported. Export a standard PDF and retry; Content Credentials metadata is supported.');
 }
