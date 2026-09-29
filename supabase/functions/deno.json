@@ -1,0 +1,5 @@
+{
+  "compilerOptions": { "strict": true },
+  "nodeModulesDir": "auto",
+  "tasks": { "check": "deno check manuscripts/index.ts contact/index.ts provision-resources/index.ts", "test": "deno test _shared/file-validation_test.ts" }
+}

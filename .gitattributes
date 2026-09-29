@@ -1,0 +1,6 @@
+* text=auto eol=lf
+"didarian_publicating (1).html" -text
+*.doc binary
+*.docx binary
+*.png binary
+*.pdf binary

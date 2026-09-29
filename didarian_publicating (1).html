@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Didarian Publicating</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6', 
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Hide default cursor for custom cursor effect */
+        body, a, button, input, textarea, select, .nav-link, label {
+            cursor: none !important;
+        }
+
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* SPA Section Visibility - Enforcing minimal top spacing */
+        .page-section {
+            display: none;
+            opacity: 0;
+            padding-top: 2rem; /* Keep tight to navbar */
+            padding-bottom: 4rem;
+        }
+        .page-section.active {
+            display: block;
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Orbiting Animation for Pills */
+        @keyframes orbit {
+            0% { transform: rotate(0deg) translateX(140px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(140px) rotate(-360deg); }
+        }
+        
+        @media (max-width: 640px) {
+            @keyframes orbit {
+                0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+                100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+            }
+        }
+
+        .orbit-pill {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -16px;
+            margin-left: -50px;
+            width: 100px;
+            z-index: 20;
+        }
+        .pill-1 { animation: orbit 15s linear infinite; }
+        .pill-2 { animation: orbit 15s linear infinite; animation-delay: -5s; }
+        .pill-3 { animation: orbit 15s linear infinite; animation-delay: -10s; }
+
+        /* Custom Cursor Elements */
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #0d9488;
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(13, 148, 136, 0.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: width 0.15s, height 0.15s, border-color 0.15s;
+        }
+
+        .cursor-hover .cursor-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #134e4a;
+        }
+        .cursor-hover .cursor-outline {
+            width: 60px;
+            height: 60px;
+            border-color: rgba(19, 78, 74, 0.8);
+            background-color: rgba(13, 148, 136, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans flex flex-col min-h-screen overflow-x-hidden">
+
+    <!-- Custom Cursor Setup -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <nav class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14"> <!-- Slim navbar -->
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="#home" class="nav-link font-serif font-bold text-xl sm:text-2xl text-slate-900 tracking-tight" data-target="home">
+                        Didarian Publicating
+                    </a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden lg:flex items-center space-x-6">
+                    <a href="#home" class="nav-link text-sm font-medium text-brand-600 transition-colors" data-target="home">Home</a>
+                    <a href="#articles" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors" data-target="articles">Articles</a>
+                    <a href="#editorial" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors" data-target="editorial">Editorial Board</a>
+                    <a href="#privacy" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors" data-target="privacy">Privacy Policy</a>
+                    <a href="#contact" class="nav-link text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors" data-target="contact">Contact Us</a>
+                    <a href="#login" class="nav-link interactive bg-brand-600 text-white px-4 py-1.5 rounded-md hover:bg-brand-900 transition-colors text-sm font-medium shadow-sm" data-target="login">Sign In</a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex items-center lg:hidden">
+                    <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-900 focus:outline-none p-2 interactive">
+                        <svg class="h-6 w-6 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-slate-100 absolute w-full shadow-lg">
+            <div class="px-4 pt-2 pb-4 space-y-1">
+                <a href="#home" class="nav-link block px-3 py-2 text-base font-medium text-brand-600 bg-brand-50 rounded-md" data-target="home">Home</a>
+                <a href="#articles" class="nav-link block px-3 py-2 text-base font-medium text-slate-700 hover:text-brand-600 hover:bg-slate-50 rounded-md" data-target="articles">Articles</a>
+                <a href="#editorial" class="nav-link block px-3 py-2 text-base font-medium text-slate-700 hover:text-brand-600 hover:bg-slate-50 rounded-md" data-target="editorial">Editorial Board</a>
+                <a href="#privacy" class="nav-link block px-3 py-2 text-base font-medium text-slate-700 hover:text-brand-600 hover:bg-slate-50 rounded-md" data-target="privacy">Privacy Policy</a>
+                <a href="#contact" class="nav-link block px-3 py-2 text-base font-medium text-slate-700 hover:text-brand-600 hover:bg-slate-50 rounded-md" data-target="contact">Contact Us</a>
+                <a href="#login" class="nav-link block px-3 py-2 text-base font-medium text-brand-600 hover:bg-brand-50 rounded-md" data-target="login">Sign In</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col">
+        <section id="home" class="page-section active bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                
+                <!-- TOP PART: 2 Column Layout -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-start">
+                    
+                    <!-- Left Column: Hero Text & Buttons -->
+                    <div class="flex flex-col justify-start pt-4 md:pt-10">
+                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-50 border border-brand-100 text-brand-600 text-xs font-semibold uppercase tracking-wider mb-6 w-max">
+                            Open Access
+                        </div>
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-slate-900 tracking-tight mb-6 leading-tight">
+                            Welcome to <br/><span class="italic text-brand-600">Didarian Publicating</span>
+                        </h1>
+                        <p class="text-lg text-slate-500 mb-8 font-light leading-relaxed max-w-lg">
+                            A modern platform for multidisciplinary peer-reviewed research, ensuring global accessibility and uncompromising academic standards.
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4 mb-10">
+                            <!-- Routes to author portal -->
+                            <button class="nav-link interactive bg-brand-600 text-white font-medium py-3 px-6 rounded-lg hover:bg-brand-900 transition-colors shadow-sm text-center" data-target="author-portal">
+                                Submit Your Paper
+                            </button>
+                            <!-- Routes to articles -->
+                            <button class="nav-link interactive bg-white text-slate-700 font-medium py-3 px-6 rounded-lg border border-slate-200 hover:bg-slate-50 hover:text-brand-600 transition-colors shadow-sm text-center" data-target="articles">
+                                View Our Articles
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Dedicated Container for 3D Element & Orbiting Pills -->
+                    <div class="relative w-full aspect-square max-w-md mx-auto md:mr-0 flex items-center justify-center pt-8 md:pt-4">
+                        <!-- 3D Canvas -->
+                        <div id="canvas-container" class="absolute inset-0 z-0 flex items-center justify-center"></div>
+                        
+                        <!-- Orbiting Pills Wrapper -->
+                        <div class="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
+                            <div class="orbit-pill pill-1">
+                                <div class="bg-white/90 backdrop-blur shadow-md text-brand-600 text-xs font-bold px-3 py-1.5 rounded-full border border-brand-100 text-center uppercase tracking-wide">
+                                    Credibility
+                                </div>
+                            </div>
+                            <div class="orbit-pill pill-2">
+                                <div class="bg-white/90 backdrop-blur shadow-md text-brand-600 text-xs font-bold px-3 py-1.5 rounded-full border border-brand-100 text-center uppercase tracking-wide">
+                                    Fast
+                                </div>
+                            </div>
+                            <div class="orbit-pill pill-3">
+                                <div class="bg-white/90 backdrop-blur shadow-md text-brand-600 text-xs font-bold px-3 py-1.5 rounded-full border border-brand-100 text-center uppercase tracking-wide">
+                                    Reliable
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- BOTTOM PART: Full-width CTA Section Spanning Both Sides -->
+                <div class="mt-4 sm:mt-8 relative z-20">
+                    <div class="bg-brand-50/70 border border-brand-100 rounded-2xl p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 w-full shadow-sm">
+                        <div class="text-center md:text-left">
+                            <h3 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Publish your First paper with us</h3>
+                            <p class="text-base text-slate-600 mt-2 max-w-2xl">Join a global community of esteemed researchers and experience our seamless, transparent peer-review and publication process.</p>
+                        </div>
+                        <button class="nav-link interactive bg-slate-900 text-white font-medium py-3 px-8 rounded-xl hover:bg-slate-800 transition-colors shadow-md whitespace-nowrap text-base flex-shrink-0" data-target="register">
+                            Start Now
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="articles" class="page-section bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-6 border-b border-slate-200 pb-4">
+                    <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Articles</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
+                    <article class="interactive bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col h-full group">
+                        <span class="text-[10px] font-semibold text-brand-600 uppercase mb-2 block tracking-wider">Research</span>
+                        <h3 class="text-base sm:text-lg font-serif font-bold text-slate-900 mb-2 group-hover:text-brand-600 transition-colors leading-snug">Quantum Applications in Modeling</h3>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-4 flex-grow">Exploring the theoretical limits of classical computing in predictive climate systems.</p>
+                        <span class="text-brand-600 text-xs sm:text-sm font-medium block pt-3 border-t border-slate-100">Read Article &rarr;</span>
+                    </article>
+                    <article class="interactive bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col h-full group">
+                        <span class="text-[10px] font-semibold text-brand-600 uppercase mb-2 block tracking-wider">Review</span>
+                        <h3 class="text-base sm:text-lg font-serif font-bold text-slate-900 mb-2 group-hover:text-brand-600 transition-colors leading-snug">Synthetic Biology Frameworks</h3>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-4 flex-grow">A comprehensive review of existing ethical guidelines surrounding synthetic cell creation.</p>
+                        <span class="text-brand-600 text-xs sm:text-sm font-medium block pt-3 border-t border-slate-100">Read Article &rarr;</span>
+                    </article>
+                    <article class="interactive bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex flex-col h-full group">
+                        <span class="text-[10px] font-semibold text-brand-600 uppercase mb-2 block tracking-wider">Methodology</span>
+                        <h3 class="text-base sm:text-lg font-serif font-bold text-slate-900 mb-2 group-hover:text-brand-600 transition-colors leading-snug">ML Bias in Medical Datasets</h3>
+                        <p class="text-slate-600 text-xs sm:text-sm mb-4 flex-grow">Quantifying demographic bias in open-source medical imaging datasets using novel metrics.</p>
+                        <span class="text-brand-600 text-xs sm:text-sm font-medium block pt-3 border-t border-slate-100">Read Article &rarr;</span>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="editorial" class="page-section bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-8 border-b border-slate-200 pb-4">
+                    <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Editorial Board</h2>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div class="text-center group interactive cursor-wrapper">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full bg-slate-200 mb-4 overflow-hidden shadow-inner border-2 border-transparent group-hover:border-brand-500 transition-colors">
+                            <img src="https://placehold.co/200x200/e2e8f0/64748b?text=JS" alt="Profile" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="font-serif font-bold text-slate-900 text-base sm:text-lg">Dr. Jane Smith</h3>
+                        <p class="text-brand-600 text-xs sm:text-sm font-medium">Editor-in-Chief</p>
+                    </div>
+                    <div class="text-center group interactive cursor-wrapper">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full bg-slate-200 mb-4 overflow-hidden shadow-inner border-2 border-transparent group-hover:border-brand-500 transition-colors">
+                            <img src="https://placehold.co/200x200/e2e8f0/64748b?text=AL" alt="Profile" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="font-serif font-bold text-slate-900 text-base sm:text-lg">Prof. Alan Lee</h3>
+                        <p class="text-brand-600 text-xs sm:text-sm font-medium">Associate Editor</p>
+                    </div>
+                    <div class="text-center group interactive cursor-wrapper">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full bg-slate-200 mb-4 overflow-hidden shadow-inner border-2 border-transparent group-hover:border-brand-500 transition-colors">
+                            <img src="https://placehold.co/200x200/e2e8f0/64748b?text=MK" alt="Profile" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="font-serif font-bold text-slate-900 text-base sm:text-lg">Dr. Maria Garcia</h3>
+                        <p class="text-brand-600 text-xs sm:text-sm font-medium">Board Member</p>
+                    </div>
+                    <div class="text-center group interactive cursor-wrapper">
+                        <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full bg-slate-200 mb-4 overflow-hidden shadow-inner border-2 border-transparent group-hover:border-brand-500 transition-colors">
+                            <img src="https://placehold.co/200x200/e2e8f0/64748b?text=DW" alt="Profile" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="font-serif font-bold text-slate-900 text-base sm:text-lg">Dr. David Wu</h3>
+                        <p class="text-brand-600 text-xs sm:text-sm font-medium">Board Member</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="page-section bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-4">Contact Us</h2>
+                        <p class="text-slate-600 mb-8 text-sm">Reach out regarding submissions, indexing, or peer-review processes.</p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="bg-brand-100 p-2 rounded-lg text-brand-600 mr-4">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-sm">Email</h4>
+                                    <p class="text-sm text-slate-500">support@didarian.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <!-- Custom inline success message instead of window.alert() -->
+                        <form class="space-y-4" onsubmit="event.preventDefault(); this.innerHTML = '<div class=\'text-center py-8\'><div class=\'inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600 mb-4\'><svg class=\'w-6 h-6\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M5 13l4 4L19 7\'></path></svg></div><h4 class=\'text-lg font-bold text-slate-900\'>Message Sent</h4><p class=\'text-sm text-slate-500 mt-2\'>We will get back to you shortly.</p></div>';">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Name</label>
+                                <input type="text" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Email</label>
+                                <input type="email" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Message</label>
+                                <textarea rows="3" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 resize-none" required></textarea>
+                            </div>
+                            <button type="submit" class="interactive w-full bg-brand-600 text-white font-medium py-2 px-4 rounded-md hover:bg-brand-900 transition-colors shadow-sm text-sm">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="privacy" class="page-section bg-white">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-4 border-b border-slate-200 pb-4">Privacy Policy</h1>
+                <div class="prose prose-slate prose-sm max-w-none">
+                    <p class="text-slate-600 mb-4">Didarian Publicating is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information.</p>
+                    <h2 class="text-lg font-serif font-bold text-slate-900 mt-6 mb-2">1. Information Collection</h2>
+                    <p class="text-slate-600 mb-4">We collect information you voluntarily provide, such as name, email, and academic affiliation, necessary for managing article submissions.</p>
+                    <h2 class="text-lg font-serif font-bold text-slate-900 mt-6 mb-2">2. Use of Information</h2>
+                    <p class="text-slate-600 mb-4">The data collected is exclusively used to facilitate the peer-review process, publish accepted manuscripts, and communicate essential updates.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="login" class="page-section bg-slate-50">
+            <div class="max-w-md mx-auto px-4 sm:px-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 mt-4">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-serif font-bold text-slate-900">Welcome Back</h2>
+                    </div>
+                    <form class="space-y-4" onsubmit="handleAuth(event, 'login-role')">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Email</label>
+                            <input type="email" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+                            <input type="password" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Log in as</label>
+                            <select id="login-role" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none bg-white">
+                                <option value="author">Author</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="interactive w-full bg-brand-600 text-white text-sm font-medium py-2 rounded-md hover:bg-brand-900 transition-colors">
+                            Sign In
+                        </button>
+                    </form>
+                    <p class="text-center text-sm text-slate-600 mt-6">
+                        Don't have an account? <a href="#register" class="nav-link font-medium text-brand-600 hover:text-brand-900" data-target="register">Register</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="register" class="page-section bg-slate-50">
+            <div class="max-w-md mx-auto px-4 sm:px-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 mt-4">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-serif font-bold text-slate-900">Create Account</h2>
+                    </div>
+                    <form class="space-y-4" onsubmit="handleAuth(event, 'register-role')">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">First Name</label>
+                                <input type="text" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Last Name</label>
+                                <input type="text" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Email</label>
+                            <input type="email" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+                            <input type="password" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Register as</label>
+                            <select id="register-role" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none bg-white">
+                                <option value="author">Author</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="interactive w-full bg-brand-600 text-white text-sm font-medium py-2 rounded-md hover:bg-brand-900 transition-colors">
+                            Create Account
+                        </button>
+                    </form>
+                    <p class="text-center text-sm text-slate-600 mt-6">
+                        Already have an account? <a href="#login" class="nav-link font-medium text-brand-600 hover:text-brand-900" data-target="login">Sign In</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="author-portal" class="page-section bg-slate-50">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-end mb-6 border-b border-slate-200 pb-4">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Author Portal</h2>
+                    </div>
+                    <button class="nav-link text-xs font-medium text-slate-500 hover:text-brand-600 interactive border border-slate-200 px-3 py-1 rounded-md bg-white" data-target="home">Log Out</button>
+                </div>
+
+                <!-- Progress Tracker -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+                    <h3 class="text-base font-bold text-slate-800 mb-6">Submission Status</h3>
+                    <div class="flex items-center justify-between relative">
+                        <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-slate-100 z-0"></div>
+                        <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1/3 h-1 bg-brand-500 z-0"></div>
+                        
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm shadow">1</div>
+                            <span class="text-xs font-semibold text-brand-600 mt-2 text-center w-24">Upload Paper</span>
+                        </div>
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-slate-400 flex items-center justify-center font-bold text-sm">2</div>
+                            <span class="text-xs font-medium text-slate-500 mt-2">Submit</span>
+                        </div>
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-slate-400 flex items-center justify-center font-bold text-sm">3</div>
+                            <span class="text-xs font-medium text-slate-500 mt-2">Publish</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-base font-bold text-slate-800 mb-4">New Submission</h3>
+                        <form onsubmit="event.preventDefault(); this.innerHTML = '<p class=\'text-brand-600 font-medium py-4 text-center\'>Paper uploaded successfully! Proceed to submit.</p>';" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Paper Title</label>
+                                <input type="text" class="interactive w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none" placeholder="Enter title...">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Upload Manuscript (PDF/Word)</label>
+                                <input type="file" class="interactive w-full text-sm text-slate-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 outline-none">
+                            </div>
+                            <button class="interactive w-full bg-brand-600 text-white text-sm font-medium py-2 rounded-md hover:bg-brand-900 transition-colors">
+                                Upload Paper
+                            </button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-base font-bold text-slate-800 mb-4">Resources</h3>
+                        <ul class="space-y-3">
+                            <li><a href="#" class="interactive text-brand-600 hover:underline flex items-center text-sm font-medium"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Download Template (Word)</a></li>
+                            <li><a href="#" class="interactive text-brand-600 hover:underline flex items-center text-sm font-medium"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Download Template (LaTeX)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-portal" class="page-section bg-slate-50">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-end mb-6 border-b border-slate-200 pb-4">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Admin Dashboard</h2>
+                    </div>
+                    <button class="nav-link text-xs font-medium text-slate-500 hover:text-brand-600 interactive border border-slate-200 px-3 py-1 rounded-md bg-white" data-target="home">Log Out</button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Pending Review</p>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">12</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">In Revision</p>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">5</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Accepted</p>
+                        <p class="text-2xl font-bold text-brand-600 mt-1">28</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Manuscript Title</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Author</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Quantum App. in Modeling</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Dr. H. Chen</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">2026-09-27</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-[10px] leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><button class="text-brand-600 hover:text-brand-900 interactive">Review</button></td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Synth. Biology Ethics</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Prof. A. Smith</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">2026-09-25</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-[10px] leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Revision</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><button class="text-brand-600 hover:text-brand-900 interactive">Details</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- STRICTLY MINIMALIST FOOTER -->
+    <footer class="bg-white py-6 border-t border-slate-200 mt-auto">
+        <div class="text-center font-serif text-slate-500 tracking-wide text-sm">
+            Didarian Publicating
+        </div>
+    </footer>
+
+    <script>
+        // Form Handling Logic for Role Selection Routing
+        window.handleAuth = function(e, selectId) {
+            e.preventDefault();
+            const role = document.getElementById(selectId).value;
+            if (role === 'admin') {
+                window.navigateTo('admin-portal');
+            } else {
+                window.navigateTo('author-portal');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- CUSTOM CURSOR LOGIC ---
+            const dot = document.getElementById('cursor-dot');
+            const outline = document.getElementById('cursor-outline');
+            
+            window.addEventListener('mousemove', (e) => {
+                const posX = e.clientX;
+                const posY = e.clientY;
+                
+                dot.style.left = `${posX}px`;
+                dot.style.top = `${posY}px`;
+                
+                outline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 150, fill: "forwards" });
+            });
+
+            const addHoverEffect = () => {
+                const interactives = document.querySelectorAll('a, button, input, textarea, select, .nav-link, .interactive, label');
+                interactives.forEach(el => {
+                    el.removeEventListener('mouseenter', handleMouseEnter);
+                    el.removeEventListener('mouseleave', handleMouseLeave);
+                    el.addEventListener('mouseenter', handleMouseEnter);
+                    el.addEventListener('mouseleave', handleMouseLeave);
+                });
+            };
+
+            const handleMouseEnter = () => document.body.classList.add('cursor-hover');
+            const handleMouseLeave = () => document.body.classList.remove('cursor-hover');
+            addHoverEffect();
+
+            // --- SPA ROUTING LOGIC ---
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page-section');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            window.navigateTo = function(targetId) {
+                pages.forEach(page => page.classList.remove('active', 'animate-fade-in'));
+
+                const targetPage = document.getElementById(targetId);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                    // Small timeout to allow display:block to apply before animation
+                    setTimeout(() => targetPage.classList.add('animate-fade-in'), 10);
+                } else {
+                    document.getElementById('home').classList.add('active', 'animate-fade-in');
+                }
+
+                // Update active link state in nav
+                navLinks.forEach(link => {
+                    // Ignore buttons like "Start Now" or "Sign In" from styling changes
+                    if(!link.classList.contains('bg-brand-600') && !link.classList.contains('bg-slate-900') && !link.classList.contains('border')) {
+                        if (link.dataset.target === targetId) {
+                            link.classList.add('text-brand-600');
+                            link.classList.remove('text-slate-600');
+                        } else {
+                            link.classList.remove('text-brand-600');
+                            link.classList.add('text-slate-600');
+                        }
+                    }
+                });
+
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+
+                window.history.pushState(null, null, `#${targetId}`);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Re-apply hover effects for newly displayed interactive elements
+                setTimeout(addHoverEffect, 100);
+            };
+
+            // Bind navigation
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('data-target');
+                    if(targetId) navigateTo(targetId);
+                });
+            });
+
+            // Handle back button
+            window.addEventListener('popstate', () => {
+                const hash = window.location.hash.replace('#', '');
+                if (hash && document.getElementById(hash)) navigateTo(hash);
+                else navigateTo('home');
+            });
+
+            // Initial load routing
+            const initialHash = window.location.hash.replace('#', '');
+            if (initialHash && document.getElementById(initialHash)) navigateTo(initialHash);
+            else navigateTo('home');
+
+
+            // --- THREE.JS 3D ELEMENT LOGIC ---
+            const initThreeJS = () => {
+                const container = document.getElementById('canvas-container');
+                if (!container) return;
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+                camera.position.z = 4;
+
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setPixelRatio(window.devicePixelRatio);
+                container.appendChild(renderer.domElement);
+
+                // Create geometric shape
+                const geometry = new THREE.IcosahedronGeometry(1.6, 0);
+                const material = new THREE.MeshPhysicalMaterial({
+                    color: 0x14b8a6,
+                    metalness: 0.2,
+                    roughness: 0.3,
+                    transparent: true,
+                    opacity: 0.8,
+                    flatShading: true
+                });
+
+                const shape = new THREE.Mesh(geometry, material);
+                
+                // Add wireframe
+                const wireframeMaterial = new THREE.LineBasicMaterial({ color: 0x0d9488, transparent: true, opacity: 0.4 });
+                const wireframe = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), wireframeMaterial);
+                shape.add(wireframe);
+
+                scene.add(shape);
+
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                scene.add(ambientLight);
+
+                const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+                dirLight1.position.set(5, 5, 5);
+                scene.add(dirLight1);
+                
+                const dirLight2 = new THREE.DirectionalLight(0xccfbf1, 0.6);
+                dirLight2.position.set(-5, -5, -5);
+                scene.add(dirLight2);
+
+                const updateSize = () => {
+                    if(container.clientWidth === 0) return;
+                    // Maintain a 1:1 aspect ratio inside the container
+                    const size = Math.min(container.clientWidth, container.clientHeight);
+                    camera.aspect = 1;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(size, size);
+                };
+
+                const animate = function () {
+                    requestAnimationFrame(animate);
+                    shape.rotation.x += 0.002;
+                    shape.rotation.y += 0.004;
+                    
+                    // Only render if container is visible
+                    if(container.offsetParent !== null) {
+                        renderer.render(scene, camera);
+                    }
+                };
+
+                window.addEventListener('resize', updateSize);
+                
+                // Ensure size is updated when home section becomes active
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.target.classList.contains('active')) {
+                            setTimeout(updateSize, 50); // slight delay to allow layout
+                        }
+                    });
+                });
+                observer.observe(document.getElementById('home'), { attributes: true, attributeFilter: ['class'] });
+
+                setTimeout(updateSize, 100);
+                animate();
+            };
+
+            initThreeJS();
+        });
+    </script>
+</body>
+</html>

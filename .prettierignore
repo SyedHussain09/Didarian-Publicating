@@ -1,0 +1,7 @@
+node_modules
+dist
+didarian_publicating (1).html
+src/types/database.generated.ts
+docs/evidence
+public/resources
+supabase/functions/provision-resources/payload.ts
