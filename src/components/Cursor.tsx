@@ -20,6 +20,7 @@ export function Cursor() {
       if (
         !query.matches ||
         !target ||
+        document.querySelector('dialog:modal') ||
         target.closest('input,textarea,select,label,[contenteditable],.native-cursor')
       ) {
         disable();

@@ -713,10 +713,16 @@
   height: 52px;
   background: rgb(13 148 136 / 0.08);
 }
+/* Native modal dialogs sit above every ordinary z-index. Restore the system
+   pointer immediately, including when a dialog opens without pointer movement. */
+body:has(dialog:modal) .cursor-dot,
+body:has(dialog:modal) .cursor-outline {
+  visibility: hidden;
+}
 @media (pointer: fine) and (hover: hover) and (prefers-reduced-motion: no-preference) {
-  body.custom-cursor-active,
-  body.custom-cursor-active a,
-  body.custom-cursor-active button {
+  body.custom-cursor-active:not(:has(dialog:modal)),
+  body.custom-cursor-active:not(:has(dialog:modal)) a,
+  body.custom-cursor-active:not(:has(dialog:modal)) button {
     cursor: none;
   }
 }
