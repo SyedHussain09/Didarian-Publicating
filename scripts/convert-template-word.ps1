@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 $workspace = Split-Path -Parent $PSScriptRoot
-$source = Join-Path $workspace 'public\resources\Didarian_Research_Template.docx'
-$target = Join-Path $workspace 'public\resources\Didarian_Research_Template.doc'
+$source = Join-Path $workspace 'public\resources\GGC_Research_Template.docx'
+$target = Join-Path $workspace 'public\resources\GGC_Research_Template.doc'
 $evidence = Join-Path $workspace 'docs\evidence\template'
 New-Item -ItemType Directory -Path $evidence -Force | Out-Null
 $word = $null
@@ -22,12 +22,12 @@ try {
         throw 'The converted DOC does not contain the requested sentence.'
     }
     if ($document.SaveFormat -ne 0) { throw 'Unexpected Word document format.' }
-    $document.ExportAsFixedFormat((Join-Path $evidence 'Didarian_Research_Template.pdf'), 17)
+    $document.ExportAsFixedFormat((Join-Path $evidence 'GGC_Research_Template.pdf'), 17)
     [ordered]@{
         verifiedAt = [DateTime]::UtcNow.ToString('o')
         reader = 'Microsoft Word COM'
         wordVersion = $word.Version
-        file = 'public/resources/Didarian_Research_Template.doc'
+        file = 'public/resources/GGC_Research_Template.doc'
         saveFormat = $document.SaveFormat
         pages = $document.ComputeStatistics(2)
         content = $text.Trim()

@@ -38,7 +38,7 @@ test('Metadata refuses mismatched MIME, macro extension, path traversal and over
     assert.throws(() => validateFileMetadata(...args));
 });
 for (const extension of ['doc', 'docx']) {
-  const data = await readFile(`public/resources/Didarian_Research_Template.${extension}`);
+  const data = await readFile(`public/resources/GGC_Research_Template.${extension}`);
   test(`Genuine ${extension.toUpperCase()} template bytes accepted`, () =>
     validateFileBytes(data, extension));
 }

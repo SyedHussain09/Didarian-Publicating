@@ -27,7 +27,7 @@ const draft = check(
 );
 f.submissionIds.push(draft.id);
 await writeFile('docs/evidence/private/fixtures.json', JSON.stringify(f, null, 2));
-const bytes = await readFile('public/resources/Didarian_Research_Template.doc');
+const bytes = await readFile('public/resources/GGC_Research_Template.doc');
 const prepared = check(
   await c.functions.invoke('manuscripts', {
     body: {

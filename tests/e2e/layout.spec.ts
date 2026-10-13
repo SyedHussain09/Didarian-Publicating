@@ -11,13 +11,13 @@ const widths = [360, 390, 768, 1024, 1440];
 const publicRoutes = [
   ['/', 'home', 'Research,'],
   ['/articles', 'articles', 'Articles'],
-  ['/about', 'about', 'Publish with Didarian'],
+  ['/about', 'about', 'Publish with GGC'],
   ['/editorial', 'editorial', 'Editorial Board'],
   ['/privacy', 'privacy', 'Privacy Policy'],
   ['/contact', 'contact', 'Contact Us'],
-  ['/login', 'login', 'Welcome Back'],
-  ['/register', 'register', 'Create Account'],
-  ['/forgot-password', 'forgot-password', 'Welcome Back'],
+  ['/login', 'login', 'Welcome back'],
+  ['/register', 'register', 'Join GGC Research Publishing'],
+  ['/forgot-password', 'forgot-password', 'Welcome back'],
 ] as const;
 
 async function captureLayout(page: Page, label: string, width: number, testInfo: TestInfo) {
@@ -145,7 +145,7 @@ for (const role of ['author', 'admin'] as const) {
     const routes =
       role === 'author'
         ? [
-            [`/author`, 'author-portal', 'Author Portal'],
+            [`/author`, 'author-portal', 'Admin Author Portal'],
             ['/author/submissions/new', 'author-new', 'New Submission'],
           ]
         : [
@@ -161,7 +161,7 @@ for (const role of ['author', 'admin'] as const) {
     ).toHaveCount(0);
     await expect(
       page.getByRole('heading', {
-        name: role === 'author' ? 'Author Portal' : 'Admin Dashboard',
+        name: role === 'author' ? 'Admin Author Portal' : 'Admin Dashboard',
         exact: true,
       }),
     ).toBeVisible();
@@ -262,7 +262,7 @@ test('author resource buttons download the actual verified Word and LaTeX files'
     ['Word', 'doc'],
     ['LaTeX', 'tex'],
   ]) {
-    const filename = `Didarian_Research_Template.${extension}`;
+    const filename = `GGC_Research_Template.${extension}`;
     const downloading = page.waitForEvent('download');
     await page
       .getByRole('button', { name: new RegExp(`Download Template \\(${label}\\)`) })

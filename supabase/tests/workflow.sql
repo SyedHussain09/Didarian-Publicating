@@ -20,6 +20,9 @@ insert into test_users select label,gen_random_uuid(),gen_random_uuid() from unn
 insert into auth.users(id,email,raw_user_meta_data) select id,'transaction-'||id||'@example.test',jsonb_build_object('first_name','Transaction','last_name',label,'role','admin') from test_users;
 insert into auth.sessions(id,user_id,created_at,updated_at) select session_id,id,now(),now() from test_users;
 update public.user_roles set role='admin' where user_id=(select id from test_users where label='admin');
+-- These synthetic identities model already-onboarded legacy accounts. New
+-- signup and role selection are tested independently in community.sql.
+update public.profiles set profile_complete=true where id in (select id from test_users);
 
 set local role authenticated;
 select set_config('request.jwt.claims',(select jsonb_build_object('sub',id,'session_id',session_id,'role','authenticated')::text from test_users where label='author_a'),true);

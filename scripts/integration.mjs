@@ -145,6 +145,17 @@ for (const user of fixtures.users) {
     await instance.auth.signInWithPassword({ email: user.email, password: user.password }),
     `Sign in ${user.label}`,
   );
+  if (user.label !== 'admin') {
+    check(
+      await instance.rpc('complete_profile', {
+        p_role: 'author',
+        p_full_name: `Integration ${user.label}`,
+        p_affiliation: 'Controlled development test',
+        p_username: null,
+      }),
+      `Complete development profile ${user.label}`,
+    );
+  }
   clients[user.label] = instance;
 }
 const { authorA, authorB, admin } = clients;
@@ -551,7 +562,7 @@ await test('Genuine DOC and DOCX bytes pass server structural verification', asy
     ['doc', 'application/msword'],
     ['docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   ]) {
-    const bytes = await readFile(`public/resources/Didarian_Research_Template.${extension}`);
+    const bytes = await readFile(`public/resources/GGC_Research_Template.${extension}`);
     const draft = check(
       await authorA.rpc(
         'save_draft',

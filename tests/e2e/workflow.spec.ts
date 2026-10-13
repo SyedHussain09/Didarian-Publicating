@@ -51,7 +51,7 @@ test('real author upload → review → atomic publication → anonymous downloa
     const templatePromise = author.waitForEvent('download');
     await author.getByRole('button', { name: 'Download Template (Word)' }).click();
     const template = await templatePromise;
-    expect(template.suggestedFilename()).toBe('Didarian_Research_Template.doc');
+    expect(template.suggestedFilename()).toBe('GGC_Research_Template.doc');
     const templateFile = testInfo.outputPath('downloaded-template.doc');
     await template.saveAs(templateFile);
     const templateBytes = await readFile(templateFile);
@@ -75,7 +75,10 @@ test('real author upload → review → atomic publication → anonymous downloa
       .fill(
         'This controlled development manuscript verifies the complete browser submission, protected review, atomic publication, and public download workflow. It is test content for removal after verification.',
       );
-    await author.getByLabel('Author names for publication').fill('Development Test Author');
+    await author.getByLabel('Full name', { exact: true }).fill('Development Test Author');
+    await author
+      .getByLabel('Institute / Organization', { exact: true })
+      .fill('Development Test Institute');
     await author.getByRole('combobox', { name: /Category/ }).selectOption('Engineering');
     await author.getByLabel(/Keywords/).fill('verification, browser');
     await author.getByLabel(/Manuscript \(PDF, DOC, DOCX\)/).setInputFiles(templateFile);
@@ -199,9 +202,9 @@ test('real logout clears private pages across back navigation and refresh', asyn
     .click();
   await expect(page).toHaveURL(/\/$/);
   await page.goBack();
-  await expect(page.getByRole('heading', { name: 'Welcome Back' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'New Submission', exact: true })).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Welcome Back' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Log Out', exact: true })).toHaveCount(0);
 });

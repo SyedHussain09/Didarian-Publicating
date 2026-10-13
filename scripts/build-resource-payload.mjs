@@ -6,12 +6,12 @@ import { resolve } from 'node:path';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const definitions = [
-  ['Didarian_Research_Template.doc', 'application/msword'],
+  ['GGC_Research_Template.doc', 'application/msword'],
   [
-    'Didarian_Research_Template.docx',
+    'GGC_Research_Template.docx',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ],
-  ['Didarian_Research_Template.tex', 'application/x-tex'],
+  ['GGC_Research_Template.tex', 'application/x-tex'],
 ];
 const resources = [];
 for (const [filename, contentType] of definitions) {

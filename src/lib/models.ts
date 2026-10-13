@@ -1,10 +1,27 @@
 export type Status = 'draft' | 'submitted' | 'under_review' | 'published' | 'rejected';
+export interface Contributor {
+  name: string;
+  institution: string;
+  email: string;
+}
+export function readContributors(value: unknown): Contributor[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (person): person is Contributor =>
+      !!person &&
+      typeof person === 'object' &&
+      typeof person.name === 'string' &&
+      typeof person.institution === 'string' &&
+      typeof person.email === 'string',
+  );
+}
 export interface Submission {
   id: string;
   owner_id: string;
   title: string;
   abstract: string;
   author_names: string;
+  contributors: Contributor[];
   category: string;
   keywords: string[];
   publication_consent: boolean;
@@ -43,6 +60,8 @@ export interface Notification {
   message: string;
   read_at: string | null;
   created_at: string;
+  article_id: string | null;
+  kind: string;
 }
 export interface ContactMessage {
   id: string;
@@ -56,6 +75,7 @@ export interface DraftInput {
   title: string;
   abstract: string;
   author_names: string;
+  contributors: Contributor[];
   category: string;
   keywords: string[];
   publication_consent: boolean;

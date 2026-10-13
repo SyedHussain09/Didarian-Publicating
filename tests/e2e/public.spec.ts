@@ -1,28 +1,43 @@
 import { expect, test } from '@playwright/test';
 
 test('anonymous direct links cannot open either private portal', async ({ page }) => {
-  for (const path of ['/author', '/author/submissions/new', '/admin', '/admin/messages']) {
+  for (const path of [
+    '/author',
+    '/author/submissions/new',
+    '/admin',
+    '/admin/messages',
+    '/reviewer',
+    '/admin/publications',
+  ]) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/login\?next=/);
-    await expect(page.getByRole('heading', { name: 'Welcome Back' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Author Portal', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Admin Author Portal', exact: true }),
+    ).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Admin Dashboard', exact: true })).toHaveCount(
       0,
     );
   }
 });
 
-test('registration and sign in provide no public role selector', async ({ page }) => {
+test('registration offers Admin Author and Reviewer but no administrator signup', async ({
+  page,
+}) => {
   await page.goto('/register');
   await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
-  await expect(
-    page.getByText('New accounts receive author access.', { exact: false }),
-  ).toBeVisible();
+  await expect(page.getByRole('radio')).toHaveCount(2);
+  await expect(page.getByRole('radio', { name: /Admin Author/ })).toBeChecked();
+  await page.getByRole('radio', { name: /Reviewer/ }).check();
+  await expect(page.getByRole('radio', { name: /Reviewer/ })).toBeChecked();
   await expect(page.getByRole('combobox')).toHaveCount(0);
   await expect(page.locator('input[type="password"]')).toHaveCount(0);
   await page.goto('/login');
   await expect(page.getByRole('combobox')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
+  await page.goto('/login?role=admin');
+  await expect(page.getByRole('heading', { name: 'Admin sign in' })).toBeVisible();
+  await expect(page.getByRole('radio')).toHaveCount(0);
 });
 
 test('old email-auth routes use the Google sign-in screen', async ({ page }) => {

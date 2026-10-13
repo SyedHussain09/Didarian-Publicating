@@ -15,7 +15,7 @@ const check = (r) => {
   return r.data;
 };
 check(await c.auth.signInWithPassword({ email: u.email, password: u.password }));
-const genuine = await readFile('public/resources/Didarian_Research_Template.docx');
+const genuine = await readFile('public/resources/GGC_Research_Template.docx');
 const macro = zipSync({ ...unzipSync(genuine), 'word/vbaProject.bin': new Uint8Array(32) });
 const report = { projectRef: f.projectRef, checks: [] };
 for (const [label, bytes, shouldPass] of [

@@ -33,7 +33,7 @@ test('cancelled upload retains a real private draft and retry verifies stored by
   await page.getByRole('combobox', { name: /Category/ }).selectOption('Engineering');
   await page
     .getByLabel(/Manuscript \(PDF, DOC, DOCX\)/)
-    .setInputFiles('public/resources/Didarian_Research_Template.docx');
+    .setInputFiles('public/resources/GGC_Research_Template.docx');
   await page.getByRole('checkbox').check();
   let releaseRequest: () => void = () => undefined;
   let markIntercepted: () => void = () => undefined;
@@ -123,7 +123,7 @@ test('public contact persists to the real protected admin inbox', async ({ page,
     JSON.stringify({ name, contactId: data.id, handled: false }, null, 2),
   );
   await expect(page.getByRole('status')).toContainText(
-    'saved to the Didarian Publicating admin inbox',
+    'saved to the GGC Research Publishing admin inbox',
   );
   const context = await browser.newContext({
     baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:5173',

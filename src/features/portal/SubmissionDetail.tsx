@@ -157,6 +157,30 @@ export function SubmissionDetail({ admin = false }: { admin?: boolean }) {
                   {current.submitter.affiliation ? ` · ${current.submitter.affiliation}` : ''}
                 </p>
               )}
+              {current.contributors.length > 0 && (
+                <details className="mt-4 text-sm">
+                  <summary className="text-link">
+                    Authors, affiliations & private contact details ({current.contributors.length})
+                  </summary>
+                  <ol className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {current.contributors.map((person, index) => (
+                      <li
+                        key={`${person.email}-${index}`}
+                        className="rounded-lg border border-slate-200 p-3 break-words"
+                      >
+                        <strong className="block">
+                          {index + 1}. {person.name}
+                        </strong>
+                        <span className="block text-slate-600 mt-1">{person.institution}</span>
+                        <span className="block text-slate-500 text-xs mt-1">{person.email}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Email addresses are private to the submitting account and authorized Admins.
+                  </p>
+                </details>
+              )}
               <ol
                 aria-label="Submission progress"
                 className="mt-6 grid grid-cols-2 gap-4 text-xs sm:grid-cols-4"

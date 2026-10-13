@@ -85,7 +85,7 @@ test('a callback with no valid session offers a fresh Google sign-in', async ({ 
   await expect(page.getByRole('link', { name: 'Back to Sign In' })).toBeVisible();
 });
 
-for (const role of ['author', 'admin'] as const) {
+for (const role of ['author', 'admin', 'reviewer'] as const) {
   test(
     'controlled OAuth callback verifies the stored ' + role + ' role and restores navigation',
     async ({ page }) => {
@@ -142,8 +142,18 @@ for (const role of ['author', 'admin'] as const) {
         let data: unknown = path.endsWith('/rpc/my_role')
           ? role
           : path.endsWith('/profiles')
-            ? { id, first_name: 'Test', last_name: 'Reader', affiliation: null }
-            : [];
+            ? {
+                id,
+                first_name: 'Test',
+                last_name: 'Reader',
+                full_name: 'Test Reader',
+                affiliation: 'Test Institute',
+                profile_complete: true,
+                username: role === 'reviewer' ? 'test_reader' : null,
+              }
+            : path.endsWith('/rpc/my_reading_list')
+              ? { count: 0, rows: [] }
+              : [];
         if (path.endsWith('/notifications'))
           data = Array.from({ length: 5 }, (_, index) => ({
             id: `note-${index}`,
@@ -174,11 +184,17 @@ for (const role of ['author', 'admin'] as const) {
       await page.goto('/login?next=%2Fadmin%2Fmessages');
       origin = new URL(page.url()).origin;
       await page.getByRole('button', { name: 'Continue with Google' }).click();
-      await expect(page).toHaveURL(role === 'author' ? /\/author$/ : /\/admin\/messages$/);
+      await expect(page).toHaveURL(
+        role === 'author'
+          ? /\/author$/
+          : role === 'reviewer'
+            ? /\/reviewer$/
+            : /\/admin\/messages$/,
+      );
       await expect(page.getByRole('main').getByRole('alert')).toHaveCount(0);
       expect(exchanges).toBe(1);
       expect(
-        await page.evaluate(() => sessionStorage.getItem('didarian:google-return-path')),
+        await page.evaluate(() => sessionStorage.getItem('ggc:google-return-path')),
       ).toBeNull();
       if (role === 'author') {
         await expect(page.getByText('Sample notification 1', { exact: true })).toBeVisible();
@@ -186,7 +202,7 @@ for (const role of ['author', 'admin'] as const) {
         await pagination.getByRole('button', { name: 'Next', exact: true }).click();
         await expect(page.getByText('Sample notification 5', { exact: true })).toBeVisible();
         await expect(page.getByText('Sample notification 1', { exact: true })).toHaveCount(0);
-      } else {
+      } else if (role === 'admin') {
         const first = page.getByRole('article').filter({ hasText: 'Example Sender 1' });
         const second = page.getByRole('article').filter({ hasText: 'Example Sender 2' });
         await expect(first.getByText('Browser-only sample message 1.')).toBeHidden();

@@ -4,7 +4,7 @@ import { Page } from '../components/UI';
 export default function About() {
   return (
     <Page
-      title="Publish with Didarian"
+      title="Publish with GGC"
       actions={
         <Link className="btn" to="/author/submissions/new">
           Submit Your Paper <span aria-hidden="true">↗</span>
@@ -19,7 +19,7 @@ export default function About() {
           <em className="text-brand-700">A wider conversation.</em>
         </h2>
         <p className="text-slate-600 leading-relaxed max-w-xl">
-          Didarian Publicating connects authors with an accessible submission, review, and
+          GGC Research Publishing connects authors with an accessible submission, review, and
           publication process. Explore open access research or share work of your own.
         </p>
       </div>
@@ -28,7 +28,7 @@ export default function About() {
           [
             '01',
             'Prepare your paper',
-            'Sign in with Google, download a template from your author portal, and save a private manuscript draft.',
+            'Sign in with Google, download a template from your Admin Author portal, and save a private manuscript draft.',
           ],
           [
             '02',

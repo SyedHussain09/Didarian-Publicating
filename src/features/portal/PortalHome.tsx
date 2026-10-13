@@ -109,7 +109,7 @@ export function PortalHome({ admin = false }: { admin?: boolean }) {
   );
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <PortalHeader title={admin ? 'Admin Dashboard' : 'Author Portal'} admin={admin} />
+      <PortalHeader title={admin ? 'Admin Dashboard' : 'Admin Author Portal'} admin={admin} />
       {admin && (
         <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {(['submitted', 'under_review', 'published', 'rejected'] as const).map((status) => (
@@ -141,9 +141,14 @@ export function PortalHome({ admin = false }: { admin?: boolean }) {
         <h2 className="text-lg font-semibold">{admin ? 'Manuscripts' : 'My submissions'}</h2>
         <div className="flex flex-wrap gap-2">
           {admin && (
-            <Link className={secondary} to="/admin/messages">
-              Contact messages
-            </Link>
+            <>
+              <Link className={secondary} to="/admin/publications">
+                Publication moderation
+              </Link>
+              <Link className={secondary} to="/admin/messages">
+                Contact messages
+              </Link>
+            </>
           )}
           <Link className={button} to={admin ? '/admin/articles/new' : '/author/submissions/new'}>
             {admin ? 'Create Article' : 'New Submission'}
@@ -272,13 +277,16 @@ export function PortalHome({ admin = false }: { admin?: boolean }) {
           <Resources />
           <section className={panel}>
             <h2 className="mb-4 text-base font-bold">Notifications</h2>
+            <Link className="text-link text-sm mb-4 inline-block" to="/notifications">
+              Open all notifications →
+            </Link>
             {notifications.isPending ? (
               <p role="status">Loading notifications…</p>
             ) : notifications.isError ? (
               <Feedback error>Notifications could not be loaded.</Feedback>
             ) : !notifications.data?.length ? (
               <p className="text-sm text-slate-500">
-                Decisions and status changes will appear here.
+                Publication updates and reviewer activity will appear here.
               </p>
             ) : (
               <ul className="space-y-4">

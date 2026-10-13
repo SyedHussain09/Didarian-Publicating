@@ -1,9 +1,10 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth, type AppRole } from './AuthProvider';
 import { Feedback, Page, Loading } from '../components/UI';
+import { roleHome } from './routes';
 
 export function ProtectedRoute({ requiredRole }: { requiredRole: AppRole }) {
-  const { user, role, loading, error, refresh } = useAuth();
+  const { user, profile, role, loading, error, refresh } = useAuth();
   const location = useLocation();
   if (loading)
     return (
@@ -27,11 +28,18 @@ export function ProtectedRoute({ requiredRole }: { requiredRole: AppRole }) {
         replace
       />
     );
+  if (!profile?.profile_complete)
+    return (
+      <Navigate
+        replace
+        to={`/account/setup?next=${encodeURIComponent(location.pathname + location.search)}`}
+      />
+    );
   if (role !== requiredRole)
     return (
       <Page title="Access restricted">
         <p>You do not have permission to open this portal.</p>
-        <a className="text-link" href={role === 'admin' ? '/admin' : '/author'}>
+        <a className="text-link" href={roleHome(role!)}>
           Open your portal
         </a>
       </Page>

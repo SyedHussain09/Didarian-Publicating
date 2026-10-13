@@ -6,6 +6,7 @@ test('Netlify production serves secure deep links, exact resources and responsiv
   page,
   request,
 }) => {
+  test.setTimeout(90_000);
   test.skip(
     process.env.E2E_BASE_URL !== 'https://didarian-publicating.netlify.app',
     'This acceptance check targets the explicitly deployed Netlify site.',
@@ -43,25 +44,38 @@ test('Netlify production serves secure deep links, exact resources and responsiv
   expect(script.headers()['cache-control']).toContain('immutable');
   expect(await script.text()).toContain('https://didarian-publicating.netlify.app');
   checks.push('Production JavaScript exists, caches immutably and uses the canonical site URL');
-  const template = await request.get('/resources/Didarian_Research_Template.doc');
+  const template = await request.get('/resources/GGC_Research_Template.doc');
   expect(template.status()).toBe(200);
   expect(template.headers()['content-type']).toContain('application/msword');
   const downloaded = await template.body();
-  const local = await readFile('public/resources/Didarian_Research_Template.doc');
+  const local = await readFile('public/resources/GGC_Research_Template.doc');
   expect(downloaded.equals(local)).toBe(true);
+  const legacyTemplate = await request.get('/resources/Didarian_Research_Template.doc');
+  expect(legacyTemplate.url()).toContain('/resources/GGC_Research_Template.doc');
+  expect((await legacyTemplate.body()).equals(local)).toBe(true);
   checks.push('Netlify serves exact genuine Word bytes without the SPA rewrite replacing the file');
   await page.goto('/');
+  await expect(page).toHaveTitle('GGC Research Publishing');
   await expect(page.getByRole('heading', { name: 'Research, open to everyone.' })).toBeVisible();
   await expect(page.getByText('Loading published articles…')).toHaveCount(0, { timeout: 20_000 });
   await expect(page.getByRole('main').getByRole('alert')).toHaveCount(0);
   await page.evaluate(() => document.fonts.ready);
-  for (const width of [1440, 390]) {
+  for (const width of [1440, 390, 360]) {
     await page.setViewportSize({ width, height: 1000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );
     await page.screenshot({ path: `docs/evidence/netlify-home-${width}.png`, fullPage: true });
   }
+  await page.locator('.article-card a').first().click();
+  await expect(page.getByRole('heading', { name: 'Discussion', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Sign in as Reviewer to participate' }),
+  ).toBeVisible();
+  await expect(page.getByRole('main').getByRole('alert')).toHaveCount(0);
+  checks.push(
+    'Actual public article and community API load without login; participation requires Reviewer sign-in',
+  );
   expect(errors).toEqual([]);
   checks.push('Live desktop/mobile layouts fit, with no JavaScript page errors');
   await writeFile(

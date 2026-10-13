@@ -11,12 +11,15 @@ import type { User } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { getSupabase, getSupabaseError } from '../lib/supabase';
 
-export type AppRole = 'author' | 'admin';
+export type AppRole = 'author' | 'admin' | 'reviewer';
 export interface Profile {
   id: string;
   first_name: string;
   last_name: string;
   affiliation: string | null;
+  full_name: string;
+  username: string | null;
+  profile_complete: boolean;
 }
 interface AuthState {
   user: User | null;
@@ -79,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const [profileResult, roleResult] = await Promise.all([
         client
           .from('profiles')
-          .select('id,first_name,last_name,affiliation')
+          .select('id,first_name,last_name,affiliation,full_name,username,profile_complete')
           .eq('id', verified.user.id)
           .single(),
         client.rpc('my_role'),
@@ -88,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(
           'Your profile could not be loaded. Retry, or contact support if the problem continues.',
         );
-      if (roleResult.error || !['author', 'admin'].includes(String(roleResult.data)))
+      if (roleResult.error || !['author', 'admin', 'reviewer'].includes(String(roleResult.data)))
         throw new Error(
           'Your account access could not be verified. Please retry or contact support.',
         );

@@ -50,7 +50,7 @@ export default function Articles({ home = false }: { home?: boolean }) {
     }
     const channel = client
       .channel('public-article-feed')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'articles' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, () => {
         void queryClient.invalidateQueries({ queryKey: ['articles'] });
       })
       .subscribe();
@@ -90,7 +90,7 @@ export default function Articles({ home = false }: { home?: boolean }) {
                 perspectives, and share your own.
               </p>
               <Link to="/about" className="hero-text-link">
-                Publish with Didarian <span aria-hidden="true">↗</span>
+                Publish with GGC <span aria-hidden="true">↗</span>
               </Link>
             </div>
             <div className="library-art" aria-hidden="true">

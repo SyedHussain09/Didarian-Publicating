@@ -13,6 +13,10 @@ import Editorial from './pages/Editorial';
 import Privacy from './pages/Privacy';
 import Contact from './pages/Contact';
 import { AuthCallback, Login, Register } from './pages/AuthPages';
+const AccountProfile = lazy(() => import('./pages/AccountProfile'));
+const ReviewerHome = lazy(() => import('./pages/ReviewerHome'));
+const AdminPublications = lazy(() => import('./pages/AdminPublications'));
+const Notifications = lazy(() => import('./pages/Notifications'));
 
 const PortalHome = lazy(() =>
   import('./pages/Portals').then((module) => ({ default: module.PortalHome })),
@@ -74,6 +78,12 @@ export default function App() {
               <Route path="resend-confirmation" element={<Navigate to="/login" replace />} />
               <Route path="reset-password" element={<Navigate to="/login" replace />} />
               <Route path="auth/callback" element={<AuthCallback />} />
+              <Route path="account/setup" element={<AccountProfile setup />} />
+              <Route path="account/profile" element={<AccountProfile />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route element={<ProtectedRoute requiredRole="reviewer" />}>
+                <Route path="reviewer" element={<ReviewerHome />} />
+              </Route>
               <Route element={<ProtectedRoute requiredRole="author" />}>
                 <Route path="author" element={<PortalHome />} />
                 <Route path="author/submissions/new" element={<SubmissionEditor />} />
@@ -84,6 +94,7 @@ export default function App() {
                 <Route path="admin/submissions/:id" element={<SubmissionDetail admin />} />
                 <Route path="admin/articles/new" element={<SubmissionEditor admin />} />
                 <Route path="admin/messages" element={<AdminMessages />} />
+                <Route path="admin/publications" element={<AdminPublications />} />
               </Route>
               <Route path="author-portal" element={<Navigate to="/author" replace />} />
               <Route path="admin-portal" element={<Navigate to="/admin" replace />} />

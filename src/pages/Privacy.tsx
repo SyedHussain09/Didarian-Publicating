@@ -6,7 +6,7 @@ export default function Privacy() {
     <Page title="Privacy Policy" narrow>
       <div className="text-sm text-slate-600 leading-relaxed space-y-4">
         <p>
-          Didarian Publicating is committed to protecting your privacy. This policy describes the
+          GGC Research Publishing is committed to protecting your privacy. This policy describes the
           information used by this publication platform.
         </p>
         <details className="policy-section" name="privacy-topic" open>
@@ -15,7 +15,10 @@ export default function Privacy() {
             We collect information you voluntarily provide, including your name, email, academic
             affiliation, manuscript files, submission metadata, and contact messages. When you sign
             in with Google, we receive your name and email to create your account. Your Google
-            password is not shared with this application.
+            password is not shared with this application. Admin Author profiles include a name and
+            institution. Reviewer profiles include a unique public username. Co-author contact
+            information is supplied by the submitting author, who should have permission to provide
+            it.
           </p>
         </details>
         <details className="policy-section" name="privacy-topic">
@@ -33,7 +36,10 @@ export default function Privacy() {
             On acceptance, the selected manuscript file, title, abstract, publication author names,
             category, keywords, and publication date become publicly available. Account email
             addresses, internal notes, rejected manuscripts, and previous manuscript versions are
-            not published.
+            not published. Author and co-author institutions are public with their names. Co-author
+            email addresses remain private. Reviewer comments and usernames are public; reviewers
+            can edit or delete their own comments. Likes are counted publicly. Saved reading lists
+            are private; an author may receive an unnamed notification that a paper was saved.
           </p>
         </details>
         <details className="policy-section" name="privacy-topic">
@@ -42,7 +48,9 @@ export default function Privacy() {
             This application uses Google for sign-in, Supabase for authentication sessions, database
             records and file storage, and Netlify for website hosting. Authentication uses browser
             storage to keep you signed in. Contact requests may use short-lived, hashed network
-            identifiers to limit abuse.
+            identifiers to limit abuse. Article activity and editorial decisions generate website
+            notifications only. Admins may remove comments or remove and restore articles.
+            Moderation records retain the administrator’s decision and reason.
           </p>
         </details>
         <details className="policy-section" name="privacy-topic">

@@ -11,7 +11,7 @@ export function safeReturnPath(value: string | null, fallback = '/author'): stri
     const url = new URL(value, 'https://local.invalid');
     if (
       url.origin !== 'https://local.invalid' ||
-      /^\/(?:login|register|auth\/callback|forgot-password|reset-password|resend-confirmation)(?:\/|$)/.test(
+      /^\/(?:login|register|account\/setup|auth\/callback|forgot-password|reset-password|resend-confirmation)(?:\/|$)/.test(
         url.pathname,
       )
     )
@@ -22,11 +22,18 @@ export function safeReturnPath(value: string | null, fallback = '/author'): stri
   }
 }
 
-export function roleReturnPath(value: string | null, role: 'author' | 'admin'): string {
-  const home = role === 'admin' ? '/admin' : '/author';
+export const roleHome = (role: 'author' | 'admin' | 'reviewer') => `/${role}`;
+export const roleLabel = (role: 'author' | 'admin' | 'reviewer') =>
+  role === 'author' ? 'Admin Author' : role === 'admin' ? 'Admin' : 'Reviewer';
+
+export function roleReturnPath(
+  value: string | null,
+  role: 'author' | 'admin' | 'reviewer',
+): string {
+  const home = roleHome(role);
   const path = safeReturnPath(value, home);
-  const otherPortal = role === 'admin' ? /^\/author(?:\/|$)/ : /^\/admin(?:\/|$)/;
-  return otherPortal.test(path.split(/[?#]/)[0]) ? home : path;
+  const portal = /^\/(author|admin|reviewer)(?:\/|$)/.exec(path.split(/[?#]/)[0]);
+  return portal && portal[1] !== role ? home : path;
 }
 
 export function legacyPath(hash: string): string | null {

@@ -7,6 +7,7 @@ import { categories, type DraftInput, type Submission } from '../../lib/models';
 import { errorMessage, validateFile } from '../../lib/validation';
 import { Feedback, PortalHeader, button, secondary, field, panel } from './shared';
 import { Resources } from './PortalHome';
+import { ContributorsEditor } from './ContributorsEditor';
 
 export function SubmissionEditor({
   admin = false,
@@ -19,7 +20,7 @@ export function SubmissionEditor({
   onSaved?: (data: Submission) => void;
   onBusyChange?: (busy: boolean) => void;
 }) {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const navigate = useNavigate();
   const cache = useQueryClient();
   const [saved, setSaved] = useState(current);
@@ -28,6 +29,19 @@ export function SubmissionEditor({
     abstract: current?.abstract ?? '',
     author_names:
       current?.author_names ?? [profile?.first_name, profile?.last_name].filter(Boolean).join(' '),
+    contributors: current?.contributors?.length
+      ? current.contributors
+      : (current?.author_names
+          ? current.author_names.split(',')
+          : [
+              profile?.full_name ||
+                [profile?.first_name, profile?.last_name].filter(Boolean).join(' '),
+            ]
+        ).map((name, index) => ({
+          name: name.trim(),
+          institution: index === 0 ? profile?.affiliation || '' : '',
+          email: index === 0 ? user?.email || '' : '',
+        })),
     category: current?.category ?? '',
     keywords: current?.keywords ?? [],
     publication_consent: current?.publication_consent ?? false,
@@ -137,19 +151,16 @@ export function SubmissionEditor({
                 onChange={(e) => change('abstract', e.target.value)}
               />
             </label>
-            <label className="block text-sm font-medium">
-              Author names for publication
-              <input
-                required
-                maxLength={1000}
-                className={`${field} mt-1`}
-                value={input.author_names}
-                onChange={(e) => change('author_names', e.target.value)}
-              />
-              <span className="mt-1 block text-xs font-normal text-slate-500">
-                Use the names and order you want shown publicly.
-              </span>
-            </label>
+            <ContributorsEditor
+              value={input.contributors}
+              onChange={(contributors) =>
+                setInput((previous) => ({
+                  ...previous,
+                  contributors,
+                  author_names: contributors.map((author) => author.name).join(', '),
+                }))
+              }
+            />
             <label className="block text-sm font-medium">
               Category
               <select

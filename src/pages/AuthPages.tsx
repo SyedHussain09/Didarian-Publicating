@@ -5,12 +5,13 @@ import { roleReturnPath, safeReturnPath } from '../auth/routes';
 import { getSupabase, getSupabaseError, isGoogleSignInEnabled, siteUrl } from '../lib/supabase';
 import { Feedback, Loading } from '../components/UI';
 
-const RETURN_PATH_KEY = 'didarian:google-return-path';
+const RETURN_PATH_KEY = 'ggc:google-return-path';
+export const ACCOUNT_CHOICE_KEY = 'ggc:account-choice';
 
 function Shell({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="page-section">
-      <div className="max-w-md mx-auto px-4 sm:px-6">
+      <div className="max-w-xl mx-auto px-4 sm:px-6">
         <div className="card sm:p-8 mt-4">
           <h1 className="text-2xl font-serif font-bold text-slate-900 text-center mb-6">{title}</h1>
           {children}
@@ -44,9 +45,12 @@ function GoogleMark() {
 }
 
 function GoogleAccess({ register = false }: { register?: boolean }) {
-  const { user, role, loading, error: accountError, refresh, signOut } = useAuth();
+  const { user, profile, role, loading, error: accountError, refresh, signOut } = useAuth();
   const [search] = useSearchParams();
   const [busy, setBusy] = useState(false);
+  const [choice, setChoice] = useState<'author' | 'reviewer'>(() =>
+    search.get('role') === 'reviewer' ? 'reviewer' : 'author',
+  );
   const [error, setError] = useState<string | null>(null);
   const inFlight = useRef(false);
   const configurationError = getSupabaseError();
@@ -61,7 +65,16 @@ function GoogleAccess({ register = false }: { register?: boolean }) {
   }, []);
 
   if (!loading && user && role)
-    return <Navigate replace to={roleReturnPath(search.get('next'), role)} />;
+    return (
+      <Navigate
+        replace
+        to={
+          profile?.profile_complete
+            ? roleReturnPath(search.get('next'), role)
+            : `/account/setup?next=${encodeURIComponent(safeReturnPath(search.get('next'), `/${choice}`))}`
+        }
+      />
+    );
 
   const continueWithGoogle = async () => {
     if (inFlight.current) return;
@@ -76,6 +89,7 @@ function GoogleAccess({ register = false }: { register?: boolean }) {
       // Store only an internal navigation path, never OAuth tokens or role claims.
       try {
         const next = search.get('next');
+        sessionStorage.setItem(ACCOUNT_CHOICE_KEY, choice);
         if (next) sessionStorage.setItem(RETURN_PATH_KEY, safeReturnPath(next));
         else sessionStorage.removeItem(RETURN_PATH_KEY);
       } catch {
@@ -103,12 +117,60 @@ function GoogleAccess({ register = false }: { register?: boolean }) {
   };
 
   return (
-    <Shell title={register ? 'Create Account' : 'Welcome Back'}>
+    <Shell
+      title={
+        register
+          ? 'Join GGC Research Publishing'
+          : search.get('role') === 'admin'
+            ? 'Admin sign in'
+            : 'Welcome back'
+      }
+    >
       <p className="text-sm text-slate-600 text-center mb-6">
         {register
-          ? 'Use your Google account to join Didarian Publicating and submit your research.'
-          : 'Continue with your Google account to access your publications and submissions.'}
+          ? 'Choose how you want to take part in our research community.'
+          : 'Sign in to your research workspace with your existing Google account.'}
       </p>
+      {search.get('role') !== 'admin' && (
+        <fieldset className="mb-6">
+          <legend className="sr-only">Account type</legend>
+          <div className="account-options">
+            {(
+              [
+                [
+                  'author',
+                  'Admin Author',
+                  'Submit research, add co-authors and follow publication updates.',
+                ],
+                [
+                  'reviewer',
+                  'Reviewer',
+                  'Discuss research, like articles and build your reading list.',
+                ],
+              ] as const
+            ).map(([value, label, description]) => (
+              <label
+                key={value}
+                className={`account-option ${choice === value ? 'account-option-selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="account-type"
+                  value={value}
+                  checked={choice === value}
+                  onChange={() => setChoice(value)}
+                />
+                <span>
+                  <strong className="block text-base text-slate-900">{label}</strong>
+                  <span className="block mt-2 text-sm font-normal text-slate-600">
+                    {description}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
       <Feedback error={configurationError || error || accountError} />
       {loading ? (
         <Loading>Checking your session…</Loading>
@@ -125,8 +187,27 @@ function GoogleAccess({ register = false }: { register?: boolean }) {
         </button>
       )}
       <p className="text-sm text-slate-600 text-center mt-5">
-        One Google account for sign-up and sign-in. New accounts receive author access.
+        {register
+          ? 'Next: confirm your name and profile details. Your email is verified by Google.'
+          : 'Existing accounts open their assigned workspace.'}
       </p>
+      <p className="mt-4 text-center text-sm text-slate-600">
+        {register ? 'Already registered? ' : 'New to GGC? '}
+        <Link
+          className="text-link"
+          to={`${register ? '/login' : '/register'}?role=${choice}${search.get('next') ? `&next=${encodeURIComponent(safeReturnPath(search.get('next')))}` : ''}`}
+        >
+          {register ? 'Sign in' : 'Create an account'}
+        </Link>
+      </p>
+      {search.get('role') !== 'admin' && (
+        <p className="mt-3 text-center text-xs text-slate-500">
+          Platform administrator?{' '}
+          <Link className="text-link" to="/login?role=admin">
+            Admin sign in
+          </Link>
+        </p>
+      )}
       <p className="text-xs text-slate-500 text-center mt-4">
         We use your Google name and email to create your profile. Read our{' '}
         <Link to="/privacy" className="text-link">
@@ -169,7 +250,7 @@ export function Register() {
 }
 
 export function AuthCallback() {
-  const { loading, user, role, error } = useAuth();
+  const { loading, user, profile, role, error } = useAuth();
   const [initialLocation] = useState(() => ({
     search: window.location.search,
     hash: window.location.hash,
@@ -243,7 +324,16 @@ export function AuthCallback() {
       </Shell>
     );
   if (!callback.error && user && role)
-    return <Navigate replace to={roleReturnPath(callback.next, role)} />;
+    return (
+      <Navigate
+        replace
+        to={
+          profile?.profile_complete
+            ? roleReturnPath(callback.next, role)
+            : `/account/setup${callback.next ? `?next=${encodeURIComponent(callback.next)}` : ''}`
+        }
+      />
+    );
   return (
     <Shell title="Sign-in Help">
       <Feedback

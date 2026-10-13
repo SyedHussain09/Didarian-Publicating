@@ -3,6 +3,9 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useAuth } from '../auth/AuthProvider';
 import { Feedback, errorMessage } from './UI';
 import { Cursor } from './Cursor';
+import { roleHome, roleLabel } from '../auth/routes';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getSupabase } from '../lib/supabase';
 
 const navigation = [
   ['/', 'Home'],
@@ -15,7 +18,43 @@ export function Layout() {
   const [menuFor, setMenuFor] = useState<string | null>(null);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
-  const { user, role, loading, signOut } = useAuth();
+  const { user, role, profile, loading, signOut } = useAuth();
+  const cache = useQueryClient();
+  useEffect(() => {
+    if (!user) return;
+    const client = getSupabase();
+    const channel = client
+      .channel(`notification-badge:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        () => {
+          void cache.invalidateQueries({ queryKey: ['private', user.id] });
+        },
+      )
+      .subscribe();
+    return () => {
+      void client.removeChannel(channel);
+    };
+  }, [user, cache]);
+  const unread = useQuery({
+    queryKey: ['private', user?.id, 'unread-notifications'],
+    enabled: !!user && !!profile?.profile_complete,
+    queryFn: async () => {
+      const { count, error } = await getSupabase()
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .is('read_at', null);
+      if (error) throw error;
+      return count || 0;
+    },
+    refetchInterval: 30_000,
+  });
   const location = useLocation();
   const navigate = useNavigate();
   const toggle = useRef<HTMLButtonElement>(null);
@@ -49,18 +88,42 @@ export function Layout() {
   };
   const account =
     !loading && user && role ? (
-      <>
-        <Link className="btn py-1.5" to={role === 'admin' ? '/admin' : '/author'}>
-          {role === 'admin' ? 'Admin Dashboard' : 'Author Portal'}
-        </Link>
-        <button
-          className="text-sm text-slate-600 hover:text-brand-600"
-          onClick={() => void logout()}
-          disabled={signingOut}
-        >
-          {signingOut ? 'Signing out…' : 'Log Out'}
-        </button>
-      </>
+      <details
+        key={location.key}
+        className="account-menu"
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.currentTarget.open = false;
+            event.currentTarget.querySelector('summary')?.focus();
+          }
+        }}
+      >
+        <summary className="btn py-1.5">
+          {roleLabel(role)} <span aria-hidden="true">⌄</span>
+          {!!unread.data && <span className="notification-dot" aria-label="Unread notifications" />}
+        </summary>
+        <div className="account-menu-panel">
+          <Link
+            className="btn py-1.5"
+            to={profile?.profile_complete ? roleHome(role) : '/account/setup'}
+          >
+            {profile?.profile_complete ? roleLabel(role) : 'Complete profile'}
+          </Link>
+          <Link className="text-sm text-slate-600 hover:text-brand-600" to="/notifications">
+            Notifications{unread.data ? ` (${unread.data > 99 ? '99+' : unread.data})` : ''}
+          </Link>
+          <Link className="text-sm text-slate-600 hover:text-brand-600" to="/account/profile">
+            Profile
+          </Link>
+          <button
+            className="text-sm text-slate-600 hover:text-brand-600"
+            onClick={() => void logout()}
+            disabled={signingOut}
+          >
+            {signingOut ? 'Signing out…' : 'Log Out'}
+          </button>
+        </div>
+      </details>
     ) : (
       <Link className="btn py-1.5" to="/login">
         Sign In
@@ -80,10 +143,10 @@ export function Layout() {
           <div className="flex justify-between items-center h-18 gap-4">
             <Link to="/" className="brand-lockup">
               <span className="brand-symbol" aria-hidden="true">
-                d<span>.</span>
+                g<span>.</span>
               </span>
               <span>
-                Didarian Publicating
+                GGC Research Publishing
                 <span className="brand-caption" aria-hidden="true">
                   Research without boundaries
                 </span>
@@ -147,9 +210,7 @@ export function Layout() {
                 {label}
               </NavLink>
             ))}
-            <div className="flex items-center gap-4 px-3 pt-3" onClick={() => setMenuFor(null)}>
-              {account}
-            </div>
+            <div className="flex items-center gap-4 px-3 pt-3">{account}</div>
           </div>
         </div>
       </nav>
@@ -164,7 +225,7 @@ export function Layout() {
       <footer className="site-footer">
         <div className="site-container flex flex-wrap items-center justify-between gap-4">
           <div>
-            <span className="font-serif text-slate-900">Didarian Publicating</span>
+            <span className="font-serif text-slate-900">GGC Research Publishing</span>
             <span className="block text-xs text-slate-500 mt-1">
               A home for ideas across disciplines.
             </span>

@@ -10,10 +10,14 @@ import type {
 } from './models';
 import { errorMessage, searchText, validateFile } from './validation';
 import type { Database } from '../types/database.generated';
+import { readContributors } from './models';
 
 export const PAGE_SIZE = 10;
 type Commands = Database['public']['Functions'];
-async function command<T>(name: keyof Commands, args: Record<string, unknown> = {}): Promise<T> {
+export async function command<T>(
+  name: keyof Commands,
+  args: Record<string, unknown> = {},
+): Promise<T> {
   const { data, error } = await getSupabase().rpc(name, args as Commands[typeof name]['Args']);
   if (error) throw new Error(error.message);
   return data as T;
@@ -41,7 +45,13 @@ export async function listSubmissions(page: number, filter: Status | '', search:
   if (searchText(search)) query = query.ilike('title', `%${searchText(search)}%`);
   const { data, count, error } = await query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
   if (error) throw error;
-  return { rows: data as Submission[], count: count ?? 0 };
+  return {
+    rows: data.map((row) => ({
+      ...row,
+      contributors: readContributors(row.contributors),
+    })) as Submission[],
+    count: count ?? 0,
+  };
 }
 export async function submissionCounts() {
   const states: Status[] = ['submitted', 'under_review', 'published', 'rejected'];
@@ -65,7 +75,7 @@ export async function getSubmission(id: string) {
     .maybeSingle();
   if (error) throw error;
   if (!data) throw new Error('Submission not found, or you do not have permission to view it.');
-  return data as Submission;
+  return { ...data, contributors: readContributors(data.contributors) } as Submission;
 }
 export async function getFiles(id: string) {
   const { data, error } = await getSupabase()
@@ -99,12 +109,12 @@ export async function articleForSubmission(id: string): Promise<string | null> {
   return command<string | null>('submission_article_slug', { p_submission_id: id });
 }
 export async function saveDraft(input: DraftInput, current?: Submission): Promise<Submission> {
-  return command('save_draft', {
+  return command('save_draft_with_contributors', {
     p_id: current?.id ?? null,
     p_expected_version: current?.version ?? null,
     p_title: input.title.trim(),
     p_abstract: input.abstract.trim(),
-    p_author_names: input.author_names.trim(),
+    p_contributors: input.contributors,
     p_category: input.category,
     p_keywords: input.keywords,
     p_publication_consent: input.publication_consent,
@@ -139,11 +149,11 @@ export async function resolveDownload(
   return data.url;
 }
 export async function downloadTemplate(format: 'doc' | 'docx' | 'tex' = 'doc') {
-  const name = `Didarian_Research_Template.${format}`;
-  const { data, error } = await getSupabase().storage.from('resources').download(name);
-  if (error)
+  const name = `GGC_Research_Template.${format}`;
+  const response = await fetch(`/resources/${name}`);
+  if (!response.ok || response.headers.get('content-type')?.includes('text/html'))
     throw new Error('The template could not be downloaded. Please retry or contact support.');
-  const url = URL.createObjectURL(data);
+  const url = URL.createObjectURL(await response.blob());
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = name;

@@ -42,7 +42,7 @@ export default function Contact() {
       }
       if (!data?.ok)
         throw new Error('The server did not confirm that your message was stored. Please retry.');
-      setSuccess('Your message has been saved to the Didarian Publicating admin inbox.');
+      setSuccess('Your message has been saved to the GGC Research Publishing admin inbox.');
       form.reset();
     } catch (caught) {
       setError(errorMessage(caught));
@@ -66,11 +66,10 @@ export default function Contact() {
               ✉
             </span>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Email</h3>
-              <p className="text-sm text-slate-500">support@didarian.com</p>
+              <h3 className="font-bold text-slate-900 text-sm">Publisher support</h3>
+              <p className="text-sm text-slate-500">Contact the administration team</p>
               <p className="text-xs text-slate-500 mt-2">
-                Supplied address awaiting publisher verification. Use the form to save a message to
-                the admin inbox.
+                Use this form to send your question to the website’s private admin inbox.
               </p>
             </div>
           </div>

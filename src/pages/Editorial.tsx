@@ -11,7 +11,7 @@ export default function Editorial() {
     <Page title="Editorial Board">
       <p className="text-sm text-slate-500 mb-6 max-w-2xl leading-relaxed">
         The names below are supplied website content. Editorial appointments are awaiting
-        confirmation by Didarian Publicating.
+        confirmation by GGC Research Publishing.
       </p>
       <div className="grid md:grid-cols-2 gap-4">
         {board.map(([initials, name, role]) => (

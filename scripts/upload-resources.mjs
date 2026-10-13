@@ -9,12 +9,12 @@ import { createClient } from '@supabase/supabase-js';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const bucket = 'resources';
 const resources = [
-  { filename: 'Didarian_Research_Template.doc', type: 'application/msword' },
+  { filename: 'GGC_Research_Template.doc', type: 'application/msword' },
   {
-    filename: 'Didarian_Research_Template.docx',
+    filename: 'GGC_Research_Template.docx',
     type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   },
-  { filename: 'Didarian_Research_Template.tex', type: 'application/x-tex' },
+  { filename: 'GGC_Research_Template.tex', type: 'application/x-tex' },
 ];
 const verifyOnly = process.argv.includes('--verify-only');
 const replace = process.argv.includes('--replace');

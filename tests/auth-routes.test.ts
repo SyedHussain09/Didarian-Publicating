@@ -13,6 +13,7 @@ describe('post-authentication destinations', () => {
     '/auth/callback?code=old',
     '/reset-password',
     '/resend-confirmation',
+    '/account/setup?next=/account/setup',
   ])('rejects unsafe or looping destination %s', (candidate) => {
     expect(safeReturnPath(candidate)).toBe('/author');
   });
@@ -32,6 +33,14 @@ describe('post-authentication destinations', () => {
       '/author/submissions/new?source=home',
     );
     expect(roleReturnPath('https://attacker.example', 'author')).toBe('/author');
+    expect(roleReturnPath(null, 'reviewer')).toBe('/reviewer');
+    expect(roleReturnPath('/author/submissions/new', 'reviewer')).toBe('/reviewer');
+    expect(roleReturnPath('/admin/publications', 'reviewer')).toBe('/reviewer');
+    expect(roleReturnPath('/reviewer', 'author')).toBe('/author');
+    expect(roleReturnPath('/reviewer', 'admin')).toBe('/admin');
+    expect(roleReturnPath('/articles/research#discussion', 'reviewer')).toBe(
+      '/articles/research#discussion',
+    );
   });
 });
 

@@ -1,8 +1,8 @@
-# Didarian Publicating
+# GGC Research Publishing
 
-A research publication platform built with React, TypeScript and Supabase, featuring Google sign-in, author submissions and editorial review.
+A research platform built with React, TypeScript and Supabase: Admin Author submissions with co-authors, Reviewer discussions and reading lists, website notifications, and Admin moderation. Articles are open to everyone.
 
-**Live website:** [didarian-publicating.netlify.app](https://didarian-publicating.netlify.app/)
+**Live website:** [GGC Research Publishing](https://didarian-publicating.netlify.app/)
 
 ## Local setup
 

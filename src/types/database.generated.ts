@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -46,11 +46,127 @@ export type Database = {
           },
         ]
       }
+      article_comments: {
+        Row: {
+          article_id: string
+          body: string
+          created_at: string
+          id: string
+          reviewer_id: string
+          updated_at: string
+          username: string
+          version: number
+        }
+        Insert: {
+          article_id: string
+          body: string
+          created_at?: string
+          id?: string
+          reviewer_id: string
+          updated_at?: string
+          username: string
+          version?: number
+        }
+        Update: {
+          article_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          reviewer_id?: string
+          updated_at?: string
+          username?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_comments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_comments_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_likes: {
+        Row: {
+          article_id: string
+          created_at: string
+          reviewer_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          reviewer_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_likes_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_likes_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_saves: {
+        Row: {
+          article_id: string
+          created_at: string
+          reviewer_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          reviewer_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_saves_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_saves_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           abstract: string
           author_names: string
           category: string
+          contributors: Json
+          deleted_at: string | null
           download_filename: string
           download_media_type: string
           id: string
@@ -63,6 +179,8 @@ export type Database = {
           abstract: string
           author_names: string
           category: string
+          contributors?: Json
+          deleted_at?: string | null
           download_filename: string
           download_media_type: string
           id?: string
@@ -75,6 +193,8 @@ export type Database = {
           abstract?: string
           author_names?: string
           category?: string
+          contributors?: Json
+          deleted_at?: string | null
           download_filename?: string
           download_media_type?: string
           id?: string
@@ -117,33 +237,66 @@ export type Database = {
       }
       notifications: {
         Row: {
+          actor_id: string | null
+          article_id: string | null
+          comment_id: string | null
           created_at: string
-          event_id: string
+          event_id: string | null
           id: string
+          kind: string
           message: string
           read_at: string | null
           recipient_id: string
           submission_id: string
         }
         Insert: {
+          actor_id?: string | null
+          article_id?: string | null
+          comment_id?: string | null
           created_at?: string
-          event_id: string
+          event_id?: string | null
           id?: string
+          kind?: string
           message: string
           read_at?: string | null
           recipient_id: string
           submission_id: string
         }
         Update: {
+          actor_id?: string | null
+          article_id?: string | null
+          comment_id?: string | null
           created_at?: string
-          event_id?: string
+          event_id?: string | null
           id?: string
+          kind?: string
           message?: string
           read_at?: string | null
           recipient_id?: string
           submission_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "article_comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_event_id_fkey"
             columns: ["event_id"]
@@ -172,25 +325,34 @@ export type Database = {
           affiliation: string
           created_at: string
           first_name: string
+          full_name: string
           id: string
           last_name: string
+          profile_complete: boolean
           updated_at: string
+          username: string | null
         }
         Insert: {
           affiliation?: string
           created_at?: string
           first_name: string
+          full_name?: string
           id: string
           last_name: string
+          profile_complete?: boolean
           updated_at?: string
+          username?: string | null
         }
         Update: {
           affiliation?: string
           created_at?: string
           first_name?: string
+          full_name?: string
           id?: string
           last_name?: string
+          profile_complete?: boolean
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -287,6 +449,7 @@ export type Database = {
           abstract: string
           author_names: string
           category: string
+          contributors: Json
           created_at: string
           current_file_id: string | null
           id: string
@@ -303,6 +466,7 @@ export type Database = {
           abstract?: string
           author_names?: string
           category?: string
+          contributors?: Json
           created_at?: string
           current_file_id?: string | null
           id?: string
@@ -319,6 +483,7 @@ export type Database = {
           abstract?: string
           author_names?: string
           category?: string
+          contributors?: Json
           created_at?: string
           current_file_id?: string | null
           id?: string
@@ -380,8 +545,25 @@ export type Database = {
         Args: { p_note: string; p_submission_id: string }
         Returns: undefined
       }
+      admin_publications: {
+        Args: { p_page?: number; p_removed?: boolean }
+        Returns: Json
+      }
+      article_activity: {
+        Args: { p_article_id: string; p_page?: number }
+        Returns: Json
+      }
       assert_active_session: { Args: never; Returns: string }
       claim_cleanup: { Args: { p_submission_id: string }; Returns: Json }
+      complete_profile: {
+        Args: {
+          p_affiliation: string
+          p_full_name: string
+          p_role: string
+          p_username?: string
+        }
+        Returns: Json
+      }
       finalize_file: {
         Args: {
           p_byte_size: number
@@ -397,6 +579,14 @@ export type Database = {
         Returns: undefined
       }
       mark_notification_read: { Args: { p_id: string }; Returns: undefined }
+      moderate_article: {
+        Args: { p_article_id: string; p_reason: string; p_removed: boolean }
+        Returns: undefined
+      }
+      my_reading_list: {
+        Args: { p_kind: string; p_page?: number }
+        Returns: Json
+      }
       my_role: { Args: never; Returns: string }
       prepare_file: {
         Args: {
@@ -448,6 +638,19 @@ export type Database = {
         }
         Returns: Json
       }
+      save_draft_with_contributors: {
+        Args: {
+          p_abstract: string
+          p_category: string
+          p_contributors: Json
+          p_expected_version: number
+          p_id: string
+          p_keywords: string[]
+          p_publication_consent: boolean
+          p_title: string
+        }
+        Returns: Json
+      }
       start_review: {
         Args: { p_expected_version: number; p_submission_id: string }
         Returns: Json
@@ -468,9 +671,20 @@ export type Database = {
         }
         Returns: Json
       }
+      write_article_activity: {
+        Args: {
+          p_action: string
+          p_article_id: string
+          p_body?: string
+          p_comment_id?: string
+          p_enabled?: boolean
+          p_expected_version?: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
-      app_role: "author" | "admin"
+      app_role: "author" | "admin" | "reviewer"
       file_verification_state: "pending" | "verified" | "rejected" | "deleting"
       submission_status:
         | "draft"
@@ -605,7 +819,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["author", "admin"],
+      app_role: ["author", "admin", "reviewer"],
       file_verification_state: ["pending", "verified", "rejected", "deleting"],
       submission_status: [
         "draft",
