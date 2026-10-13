@@ -8,7 +8,7 @@ test('Netlify production serves secure deep links, exact resources and responsiv
 }) => {
   test.setTimeout(90_000);
   test.skip(
-    process.env.E2E_BASE_URL !== 'https://ggcresearchpublishing.netlify.app',
+    process.env.E2E_BASE_URL !== 'https://didarian-publicating.netlify.app',
     'This acceptance check targets the explicitly deployed Netlify site.',
   );
   const checks: string[] = [];
@@ -42,7 +42,7 @@ test('Netlify production serves secure deep links, exact resources and responsiv
   const script = await request.get(entry!);
   expect(script.status()).toBe(200);
   expect(script.headers()['cache-control']).toContain('immutable');
-  expect(await script.text()).toContain('https://ggcresearchpublishing.netlify.app');
+  expect(await script.text()).toContain('https://didarian-publicating.netlify.app');
   checks.push('Production JavaScript exists, caches immutably and uses the canonical site URL');
   const template = await request.get('/resources/GGC_Research_Template.doc');
   expect(template.status()).toBe(200);
