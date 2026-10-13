@@ -12,7 +12,7 @@ export function env(name: string): string {
 
 export function cors(request: Request): Record<string, string> {
   const origin = request.headers.get('origin');
-  const allowed = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:5173,http://127.0.0.1:5173,https://didarian-publicating.netlify.app').split(',').map(value => value.trim()).filter(Boolean);
+  const allowed = (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:5173,http://127.0.0.1:5173,https://ggcresearchpublishing.netlify.app').split(',').map(value => value.trim()).filter(Boolean);
   if (!origin || !allowed.includes(origin)) throw new HttpError(403, 'Origin is not allowed.');
   return {
     'Access-Control-Allow-Origin': origin,

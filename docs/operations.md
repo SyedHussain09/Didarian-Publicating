@@ -25,3 +25,7 @@ Internal setup records, account metadata, credentials and test evidence are excl
 Anyone can read published articles. Only Reviewers can comment, like and save; they can edit/delete their own comments and undo reactions. Admins can delete any comment and remove/restore public articles with an audit reason. Admin Authors can list up to 20 contributors; names and institutions become public on publication, while contributor email addresses stay private. Activity notifications appear inside the website and never send email.
 
 Run supabase/tests/community.sql in a trusted database test environment to verify permissions and workflow using synthetic records inside a rolled-back transaction. tests/e2e/community.spec.ts checks interfaces with intercepted responses and does not mutate production. Existing integration tests require separate explicitly supplied development accounts.
+
+## Production domain
+
+The site is https://ggcresearchpublishing.netlify.app. Set production VITE_SITE_URL to this exact origin before building. For a domain change, also update Supabase Auth’s Site URL and exact /auth/callback allowlist, and each Edge Function’s ALLOWED_ORIGINS. Preserve intended localhost entries and remove a retired hostname once it is no longer controlled. Google’s OAuth provider callback remains the Supabase project /auth/v1/callback URL; existing accounts, roles and manuscripts do not need migration. Users sign in again on the new browser origin.

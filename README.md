@@ -2,7 +2,7 @@
 
 A research platform built with React, TypeScript and Supabase: Admin Author submissions with co-authors, Reviewer discussions and reading lists, website notifications, and Admin moderation. Articles are open to everyone.
 
-**Live website:** [GGC Research Publishing](https://didarian-publicating.netlify.app/)
+**Live website:** [GGC Research Publishing](https://ggcresearchpublishing.netlify.app/)
 
 ## Local setup
 
